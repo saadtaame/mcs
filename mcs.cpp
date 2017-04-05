@@ -2,6 +2,7 @@
 #include <cstring>
 #include <vector>
 #include <set>
+#include <iostream>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ void mcs(int v = 0)
 {   set< pair<int, int> > s;
     int k = 0;
 
-    memset(pos, ~0, sizeof(pos));
+    memset(pos, -1, sizeof(pos));
 
     s.insert(make_pair(0, v));
     while(s.empty() == false)
@@ -38,17 +39,22 @@ void mcs(int v = 0)
 }
 
 bool perfect(void)
-{   for(int j = n - 1; j >= 0; j--)
-    {   int last_pred = -1;
-        for(int i = 0; i < adj[j].size(); i++)
-        {   int y = adj[j][i];
-            if(pos[y] >= pos[order[j]]) continue;
-            if(pos[y] > last_pred) last_pred = pos[y];
+{   for(int j = 1; j < n; j++)
+    {   int u = -1;
+	int v = order[j];
+        for(int i = 0; i < adj[v].size(); i++)
+        {   int y = adj[v][i];
+            if(pos[y] < pos[v]) {
+		if(u == -1) u = y;
+		else if(pos[u] < pos[y]) u =y;
+	    }
         }
-        for(int i = 0; i < adj[j].size(); i++)
-        {   int y = adj[j][i];
-            if(pos[y] >= pos[order[j]] || pos[y] == last_pred) continue;
-            if(edges.count(make_pair(order[last_pred], y)) == 0)
+
+        for(int i = 0; i < adj[v].size(); i++)
+        {   int y = adj[v][i];
+	    if(y == u) continue;
+	    if(pos[y] >= pos[u]) continue;
+            if(edges.count(make_pair(u, y)) == 0)
                 return false;
         }
     }
@@ -66,7 +72,8 @@ int main(void)
         edges.insert(make_pair(y, x));
     }
 
-    mcs();
+    mcs();         
+
     if(perfect()) puts("CHORDAL");
     else puts("NOT CHORDAL");
 
